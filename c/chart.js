@@ -4,7 +4,7 @@
  * b = [x,y]
  * Retorna um array com os pontos adicionais
  */
- const curve2points = (a, b) => {
+const curve2points = (a, b) => {
   const d = Math.hypot(b[0] - a[0], b[1] - a[1]);   // distancia entre a,b
   const da = d * 0.25;                              // constante distancia entra a e a'
   const db = d * 0.2;                               // constante distancia entra b e b'
@@ -21,14 +21,39 @@
   return points;
 }
 
+/**
+ * Cria o ponto da extremidade final de um ramo, dado o ponto inicial do mesmo
+ * 
+ * @param {Array} stemStartPoint Ponto inicial do ramo no formato [x,y]
+ * @param {number} length Tamanho do ramo
+ * @param {boolean} inverted Define se o ponto gerado tem um x menor que o inicial
+ * @return {Array} Retorna o ponto no formato [x,y]
+ */
+const createStemEndPoint = (stemStartPoint, length, inverted) => {
+  let x = 0;
+  if (inverted) {
+    x = stemStartPoint[0] + (length * 0.52);
+  } else {
+    x = stemStartPoint[0] - (length * 0.52);
+  }
+  const y = stemStartPoint[1] - (length * randomLength(0.4, 0.6));
+  return [x, y];
+}
+
+const randomLength = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 async function draw() {
   // Funções de acesso aos atributos dos dados
   const groupAcessor = d => d.grupo;
+  const stemStartPointAcessor = d => d.stemStartPoint;
+  const stemEndPointAcessor = d => d.stemEndPoint;
 
   // Recuperação dos dados
   const data = await d3.csv("data.csv");
-  const groups = Array.from(d3.group(data, groupAcessor).keys());
-  
+  const groupsDomain = Array.from(d3.group(data, groupAcessor).keys());
+
   // Configuração do desenho
   const dimensions = {
     width: 800,
@@ -46,13 +71,13 @@ async function draw() {
   // Definição da área de pintura
   const wrapper = d3.select("#wrapper")
     .append("svg")
-      .attr("viewBox", "0 0 " + dimensions.wrapperWidth + " " + dimensions.wrapperHeight)
-      .attr("width", "100%");
-  
+    .attr("viewBox", "0 0 " + dimensions.wrapperWidth + " " + dimensions.wrapperHeight)
+    .attr("width", "100%");
+
   const bounds = wrapper.append("g")
     .attr("transform", "translate(" + dimensions.margin.left + ", " + dimensions.margin.top + ")");
 
-  
+
   // Cria tronco principal que servirá de base para posicionar os grupos de pétalas
   const a = [dimensions.width * 0.5, 0];
   const b = [dimensions.width * 0.5, dimensions.height];
@@ -64,31 +89,60 @@ async function draw() {
     .attr("fill", "none");
   const stemLength = stem.node().getTotalLength();
 
-  // Scales
-  const stemScale = d3.scaleBand().domain(groups).range([stemLength, 0]);
+  // Escalas
+  const stemScale = d3.scaleBand().domain(groupsDomain).range([stemLength, 0]);
 
-  bounds.append("g").append("circle").attr("r", 5).attr("fill", "none").attr("stroke", "black").attr("stroke-width", "1")
-      .attr("cx", stem.node().getPointAtLength(stemScale("A")).x)
-      .attr("cy", stem.node().getPointAtLength(stemScale("A")).y)
-      .attr("r", 5)
-      .attr("stroke", "black")
-      .attr("fill", "none");
-  bounds.append("g").append("circle").attr("r", 5).attr("fill", "none").attr("stroke", "black").attr("stroke-width", "1")
-      .attr("cx", stem.node().getPointAtLength(stemScale("B")).x)
-      .attr("cy", stem.node().getPointAtLength(stemScale("B")).y)
-      .attr("r", 5)
-      .attr("stroke", "black")
-      .attr("fill", "none");
-  bounds.append("g").append("circle").attr("r", 5).attr("fill", "none").attr("stroke", "black").attr("stroke-width", "1")
-      .attr("cx", stem.node().getPointAtLength(stemScale("C")).x)
-      .attr("cy", stem.node().getPointAtLength(stemScale("C")).y)
-      .attr("r", 5)
-      .attr("stroke", "black")
-      .attr("fill", "none");
-  bounds.append("g").append("circle").attr("r", 5).attr("fill", "none").attr("stroke", "black").attr("stroke-width", "1")
-      .attr("cx", stem.node().getPointAtLength(stemScale("D")).x)
-      .attr("cy", stem.node().getPointAtLength(stemScale("D")).y)
-      .attr("r", 5)
+  // Cria dados adicionais, úteis para posicionamento das peças
+  const groups = groupsDomain.map((d, i) => {
+    const startPoint = [
+      stem.node().getPointAtLength(stemScale(d)).x,
+      stem.node().getPointAtLength(stemScale(d)).y];
+    let endpoint;
+    if (i === groupsDomain.length - 1) {
+      endpoint = startPoint;
+    } else {
+      endpoint = createStemEndPoint(startPoint, randomLength(140, 145), (i % 2 === 0))
+    }
+    return {
+      grupo: d,
+      stemStartPoint: startPoint,
+      stemEndPoint: endpoint
+    }
+  });
+  bounds.append("g")
+    .selectAll("circle")
+    .data(groups)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("cx", d => stemStartPointAcessor(d)[0])
+    .attr("cy", d => stemStartPointAcessor(d)[1])
+    .attr("r", 5)
+    .attr("stroke", "black")
+    .attr("fill", "none");
+  bounds.append("g")
+    .selectAll("circle")
+    .data(groups)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("cx", d => stemEndPointAcessor(d)[0])
+    .attr("cy", d => stemEndPointAcessor(d)[1])
+    .attr("r", 5)
+    .attr("stroke", "black")
+    .attr("fill", "none");
+  bounds.append("g")
+    .selectAll("path")
+    .data(groups)
+    .enter()
+    .append("path")
+      .attr("d", d => stemLine(curve2points(d.stemStartPoint, d.stemEndPoint)))
       .attr("stroke", "black")
       .attr("fill", "none");
 }
