@@ -9,8 +9,8 @@
   const d = Math.hypot(b[0] - a[0], b[1] - a[1]);   // distancia entre a,b
   const distanceA = d * 0.25;                       // constante distancia entra a e a'
   const distanceB = d * 0.2;                        // constante distancia entra b e b'
-  const angleA = 45;
-  const angleB = 75;
+  const angleA = randomNum(40, 50);
+  const angleB = randomNum(70, 80);
   const points = [];
   let aX, aY, bX, bY = 0;
   if (b[1] < a[1] && b[0] > a[0]) {
