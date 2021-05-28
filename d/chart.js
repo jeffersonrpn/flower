@@ -72,8 +72,34 @@ const randomNum = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+/**
+ * Gera uma curva com o desenho de uma pétala que podem ser de 3 tipos
+ * 
+ * @param {number} Tipo da pétala
+ * @return {number} Retorna um número aleatório entre min e max
+ */
+// const petalPoints1 = [[4,4],[20,6],[56,20],[80,80],[42,58],[0,28],[22,26],[0,18]];
+// const petalPoints0 = [[0,0],[12,6],[56,20],[82,80],[50,62],[22,46],[0,20]];
+// const petalPoints3 = [[0,0],[26,4],[56,20],[85,80],[46,58],[10,40],[22,32],[8,32],[8,22],[16,20],[0,16]];
+const getPetalPoints = (type) => {
+  switch (type) {
+    case 0:
+      return [[4,4],[20,6],[56,20],[80,80],[42,58],[0,28],[22,26],[0,18]];
+      break;
+    case 1:
+      return [[0,0],[26,4],[56,20],[85,80],[46,58],[10,40],[22,32],[8,32],[8,22],[16,20],[0,16]];
+      break;
+    case 2:
+    default:
+      return [[0,0],[12,6],[56,20],[82,80],[50,62],[22,46],[0,20]];
+      break;
+  }
+}
+
 async function draw() {
   // Funções de acesso aos atributos dos dados
+  const nameAcessor = d => d.nome;
+  const attr1Acessor = d => d.alimentacao;
   const groupAcessor = d => d.grupo;
   const stemStartPointAcessor = d => d.stemStartPoint;
   const stemEndPointAcessor = d => d.stemEndPoint;
@@ -81,6 +107,7 @@ async function draw() {
   // Recuperação dos dados
   const data = await d3.csv("data.csv");
   const groupsDomain = Array.from(d3.group(data, groupAcessor).keys());
+  const attr1Domain = Array.from(d3.group(data, attr1Acessor).keys());
 
   // Configuração do desenho
   const dimensions = {
@@ -110,14 +137,18 @@ async function draw() {
   const b = [dimensions.width * 0.5, dimensions.height];
   const points = curve2points(a, b);
   const stemLine = d3.line().curve(d3.curveBasis);
-  const stem = bounds.append("path")
-    .attr("d", stemLine(points))
-    .attr("stroke", "black")
-    .attr("fill", "none");
+  const stem = bounds.append("g")
+    .attr("id", "mainStem")
+    .append("path")
+      .attr("d", stemLine(points))
+      .attr("stroke", "black")
+      .attr("fill", "none");
   const stemLength = stem.node().getTotalLength();
 
   // Escalas
   const stemScale = d3.scaleBand().domain(groupsDomain).range([stemLength, 0]);
+  const attr1Scale = d3.scaleOrdinal().domain(attr1Domain).range([0, 1, 2]);
+  const petalScale = d3.line().curve(d3.curveBasisClosed);
 
   // Cria dados adicionais, úteis para posicionamento das peças
   const groups = groupsDomain.map((d, i) => {
@@ -128,7 +159,7 @@ async function draw() {
     if (i === groupsDomain.length - 1) {
       endpoint = startPoint;
     } else {
-      endpoint = createStemEndPoint(startPoint, randomNum(190, 210), (i % 2 === 0))
+      endpoint = createStemEndPoint(startPoint, randomNum(250, 300), (i % 2 === 0))
     }
     return {
       grupo: d,
@@ -136,41 +167,61 @@ async function draw() {
       stemEndPoint: endpoint
     }
   });
+  data.map(d => {
+    d.coordinates = groups.find(g => groupAcessor(g) === groupAcessor(d));
+  })
+  
+  // Desenha ramos
   bounds.append("g")
-    .selectAll("circle")
-    .data(groups)
-    .enter()
-    .append("circle")
-    .attr("r", 5)
-    .attr("fill", "none")
-    .attr("stroke", "black")
-    .attr("stroke-width", "1")
-    .attr("cx", d => stemStartPointAcessor(d)[0])
-    .attr("cy", d => stemStartPointAcessor(d)[1])
-    .attr("r", 5)
-    .attr("stroke", "black")
-    .attr("fill", "none");
+    .attr("id", "stems")
+      .selectAll("path")
+      .data(groups)
+      .enter()
+      .append("path")
+      .attr("d", d => stemLine(curve2points(stemStartPointAcessor(d), stemEndPointAcessor(d))))
+      .attr("stroke", "black")
+      .attr("fill", "none");
+  
+  // Desenha pétalas
   bounds.append("g")
-    .selectAll("circle")
-    .data(groups)
-    .enter()
-    .append("circle")
-    .attr("r", 5)
-    .attr("fill", "none")
-    .attr("stroke", "black")
-    .attr("stroke-width", "1")
-    .attr("cx", d => stemEndPointAcessor(d)[0])
-    .attr("cy", d => stemEndPointAcessor(d)[1])
-    .attr("r", 5)
-    .attr("stroke", "black")
-    .attr("fill", "none");
-  bounds.append("g")
-    .selectAll("path")
-    .data(groups)
-    .enter()
-    .append("path")
-    .attr("d", d => stemLine(curve2points(d.stemStartPoint, d.stemEndPoint)))
-    .attr("stroke", "black")
-    .attr("fill", "none");
+    .attr("class", "petals")
+      .selectAll("g")
+      .data(data)
+      .enter()
+      .append("g")
+        .attr("class", "petal")
+        .append("path")
+          .attr("d", d => petalScale(getPetalPoints(attr1Scale(attr1Acessor(d)))))
+          .attr("stroke", "black")
+          .attr("fill", "none");
+
+  // bounds.append("g")
+  //   .selectAll("circle")
+  //   .data(groups)
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .attr("fill", "none")
+  //   .attr("stroke", "black")
+  //   .attr("stroke-width", "1")
+  //   .attr("cx", d => stemStartPointAcessor(d)[0])
+  //   .attr("cy", d => stemStartPointAcessor(d)[1])
+  //   .attr("r", 5)
+  //   .attr("stroke", "black")
+  //   .attr("fill", "none");
+  // bounds.append("g")
+  //   .selectAll("circle")
+  //   .data(groups)
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .attr("fill", "none")
+  //   .attr("stroke", "black")
+  //   .attr("stroke-width", "1")
+  //   .attr("cx", d => stemEndPointAcessor(d)[0])
+  //   .attr("cy", d => stemEndPointAcessor(d)[1])
+  //   .attr("r", 5)
+  //   .attr("stroke", "black")
+  //   .attr("fill", "none");
 }
 draw();
