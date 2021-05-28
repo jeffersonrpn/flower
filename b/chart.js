@@ -6,17 +6,25 @@
  */
 const curve2points = (a, b) => {
   const d = Math.hypot(b[0] - a[0], b[1] - a[1]);   // distancia entre a,b
-  const da = d * 0.25;                              // constante distancia entra a e a'
-  const db = d * 0.2;                               // constante distancia entra b e b'
+  const distanceA = d * 0.25;                       // constante distancia entra a e a'
+  const distanceB = d * 0.2;                        // constante distancia entra b e b'
+  const angle = 45;
   const points = [];
-  points.push(a);
-  if (b[0] - a[0] >= 0) {
-    points.push([a[0] + (da * 0.71), a[1] + (da * 0.71)]); // tilt de 45°
-    points.push([b[0] - (db * 0.5), b[1] - (db * 0.87)]);  // tilt de -30°
+  let aX, aY, bX, bY = 0;
+  if (b[0] >= a[0]) {
+    aX = a[0] + (distanceA * Math.sin((angle * Math.PI) / 180));
+    aY = a[1] + (distanceA * Math.cos((angle * Math.PI) / 180));
+    bX = b[0] - (distanceB * Math.cos((angle * Math.PI) / 180));
+    bY = b[1] - (distanceB * Math.sin((angle * Math.PI) / 180));
   } else {
-    points.push([a[0] - (da * 0.71), a[1] - (da * 0.71)]); // tilt de -45°
-    points.push([b[0] + (db * 0.5), b[1] + (db * 0.87)]);  // tilt de 30°
+    aX = a[0] - (distanceA * Math.sin((angle * Math.PI) / 180));
+    aY = a[1] + (distanceA * Math.cos((angle * Math.PI) / 180));
+    bX = b[0] + (distanceB * Math.cos((angle * Math.PI) / 180));
+    bY = b[1] - (distanceB * Math.sin((angle * Math.PI) / 180));
   }
+  points.push(a);
+  points.push([aX, aY]);
+  points.push([bX, bY]);
   points.push(b);
   return points;
 }
@@ -24,7 +32,7 @@ const curve2points = (a, b) => {
 async function draw() {
   const dimensions = {
     width: 800,
-    height: 300,
+    height: 800,
     margin: {
       top: 50,
       right: 50,
@@ -51,12 +59,62 @@ async function draw() {
     .attr("d", stem(points))
     .attr("stroke", "black")
     .attr("fill", "none");
+  bounds.append("g")
+    .selectAll("circle")
+    .data(points)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("cx", d => d[0])
+    .attr("cy", d => d[1])
+    .attr("r", 5)
+    .attr("stroke", "black")
+    .attr("fill", "none");
 
   const a2 = [300, 100];
-  const b2 = [200, 100];
+  const b2 = [600, 100];
   const points2 = curve2points(a2, b2);
   bounds.append("path")
     .attr("d", stem(points2))
+    .attr("stroke", "black")
+    .attr("fill", "none");
+  bounds.append("g")
+    .selectAll("circle")
+    .data(points2)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("cx", d => d[0])
+    .attr("cy", d => d[1])
+    .attr("r", 5)
+    .attr("stroke", "black")
+    .attr("fill", "none");
+
+  const a3 = [600, 400];
+  const b3 = [300, 200];
+  const points3 = curve2points(a3, b3);
+  bounds.append("path")
+    .attr("d", stem(points3))
+    .attr("stroke", "black")
+    .attr("fill", "none");
+  bounds.append("g")
+    .selectAll("circle")
+    .data(points3)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("cx", d => d[0])
+    .attr("cy", d => d[1])
+    .attr("r", 5)
     .attr("stroke", "black")
     .attr("fill", "none");
 }
