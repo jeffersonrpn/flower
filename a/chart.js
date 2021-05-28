@@ -66,7 +66,7 @@ async function draw() {
       .attr("fill", "none");
 
   const petal7 = bounds.append("g")
-    .attr("transform", "translate(" + (240 + 140) + ", 0) scale(-1 1)")
+    .attr("transform", "translate(" + (240 + 137) + ", 0) scale(-1 1)")
     .append("path")
       .attr("d", petal(petalPoints1))
       .attr("stroke", "black")
@@ -78,15 +78,12 @@ async function draw() {
     .attr("stroke", "black")
     .attr("fill", "none");
   const petal9 = bounds.append("g")
-    .attr("transform", "translate(" + (240 + 140) + ", 240) scale(-1 1)")
+    .attr("transform", "translate(" + (240 + 144) + ", 240) scale(-1 1)")
     .append("path")
       .attr("d", petal(petalPoints3))
       .attr("stroke", "black")
       .attr("fill", "none");
 
-  const line1 = bounds.append("line")
-    .attr("x1", 0)
-    .attr("x2", 360)
   // bounds.append("g")
   //   .attr("transform", "translate(0, 0)")
   //   .selectAll("circle")
@@ -98,6 +95,87 @@ async function draw() {
   //       .attr("fill", "none")
   //       .attr("stroke", "black")
   //       .attr("stroke-width", "1");
+
+  bounds.append("g")
+    .attr("transform", "translate(0, 0)")
+      .append("circle")
+        .attr("cx", 70)
+        .attr("cy", 70)
+        .attr("r", 3)
+        .attr("fill", "red")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(0, 120)")
+      .append("circle")
+        .attr("cx", 70)
+        .attr("cy", 70)
+        .attr("r", 3)
+        .attr("fill", "red")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(0, 240)")
+      .append("circle")
+        .attr("cx", 72)
+        .attr("cy", 68)
+        .attr("r", 3)
+        .attr("fill", "red")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(120, 0) rotate(45 68 68)")
+      .append("circle")
+        .attr("cx", 68)
+        .attr("cy", 68)
+        .attr("r", 3)
+        .attr("fill", "blue")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(120, 120) rotate(45 68 68)")
+      .append("circle")
+        .attr("cx", 70)
+        .attr("cy", 70)
+        .attr("r", 3)
+        .attr("fill", "blue")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(120, 240) rotate(45 68 68)")
+      .append("circle")
+        .attr("cx", 72)
+        .attr("cy", 68)
+        .attr("r", 3)
+        .attr("fill", "blue")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(240, 0) rotate(45 68 68)")
+      .append("circle")
+        .attr("cx", 68)
+        .attr("cy", 68)
+        .attr("r", 3)
+        .attr("fill", "green")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(240, 120) rotate(45 68 68)")
+      .append("circle")
+        .attr("cx", 70)
+        .attr("cy", 70)
+        .attr("r", 3)
+        .attr("fill", "green")
+        .attr("stroke-width", "none");
+
+  bounds.append("g")
+    .attr("transform", "translate(240, 240) rotate(45 72 68)")
+      .append("circle")
+        .attr("cx", 72)
+        .attr("cy", 68)
+        .attr("r", 3)
+        .attr("fill", "green")
+        .attr("stroke-width", "none");
 
 }
 draw();
