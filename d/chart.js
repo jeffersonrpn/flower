@@ -82,14 +82,17 @@ const getPetalPoints = (type) => {
   switch (type) {
     case 0:
       // Pétala com 1 gomo
-      return [[4, 4], [20, 6], [56, 20], [80, 80], [42, 58], [0, 28], [22, 26], [0, 18]];
+      // return [[4, 4], [20, 6], [56, 20], [80, 80], [42, 58], [0, 28], [22, 26], [0, 18]];
+      return [[4,4],[20,6],[56,20],[80,70],[80,80],[78,80],[42,68],[0,28],[18,26],[0,18]];
     case 1:
       // Pétala com 3 gomos
-      return [[0, 0], [26, 4], [56, 20], [85, 80], [46, 58], [10, 40], [22, 32], [8, 32], [8, 22], [16, 20], [0, 16]];
+      // return [[0, 0], [26, 4], [56, 20], [85, 80], [46, 58], [10, 40], [22, 32], [8, 32], [8, 22], [16, 20], [0, 16]];
+      return [[0,0],[26,4],[56,20],[80,70],[80,80],[78,80],[42,68],[10,40],[18,32],[8,32],[8,22],[12,20],[0,16]];
     case 2:
     default:
       // Pétala com 0 gomos
-      return [[0, 0], [12, 6], [56, 20], [82, 80], [50, 62], [22, 46], [0, 20]];
+      // return [[0, 0], [12, 6], [56, 20], [82, 80], [50, 62], [22, 46], [0, 20]];
+      return [[0,0],[12,6],[56,20],[80,70],[80,80],[78,80],[50,68],[22,46],[0,20]];
   }
 }
 
@@ -105,27 +108,35 @@ const getPetalPoints = (type) => {
  * |____.|
  *      Ponto onde o path precisa estar
  * 
- * @param {number} Tipo da pétala
+ * @param {number} type Tipo da pétala
  * @return {Array} Retorna o comprimento nos eixos x e y para reposição da pétala
  */
 const getPetalShift = (type) => {
   switch (type) {
     case 0:
-      return [68, 68];
+      return [80, 80];
     case 1:
-      return [70, 70];
+      return [80, 80];
     case 2:
     default:
-      return [78, 68];
+      return [80, 80];
   }
 }
 
-const getPetalRotation = (point, shift, groupCount, order) => {
+/**
+ * Cria uma transformação para a pétala dada a ordem de disposição.
+ * 
+ * @param {Array} point Coordenadas de onde deve-se posicionar a pétala no formato [x, y]
+ * @param {Array} shift Dimensões que serão subtraídas de point no formato [width, height]
+ * @param {number} order Ordem de disposição da pétala: 1, 2 ou 3
+ * @return {string} Retorna o transformação pra ser usada no atributo "transform"
+ */
+const getPetalRotation = (point, shift, order) => {
   switch (order) {
     case "2":
-      return `translate(${point[0] - shift[0] + 140}, ${point[1] - shift[1]}) scale(-1 1)`;
+      return `translate(${point[0] - shift[0] + 160}, ${point[1] - shift[1]}) scale(-1 1)`;
     case "3":
-      return `translate(${point[0] - shift[0]}, ${point[1] - shift[1]}) rotate(45 68 68)`;
+      return `translate(${point[0] - shift[0]}, ${point[1] - shift[1]}) rotate(45 ${shift[0]} ${shift[1]})`;
     case "1":
     default:
       return `translate(${point[0] - shift[0]}, ${point[1] - shift[1]})`;
@@ -208,7 +219,6 @@ async function draw() {
   data.map(d => {
     d.coordinates = groups.find(g => groupAcessor(g) === groupAcessor(d));
   });
-  const countGroups = d3.rollup(data, v => v.length, d => groupAcessor(d));
 
   // Desenha ramos
   bounds.append("g")
@@ -232,7 +242,6 @@ async function draw() {
     .attr("transform", d => getPetalRotation(
       stemEndPointAcessor(d.coordinates),
       getPetalShift(attr1Scale(attr1Acessor(d))),
-      countGroups.get(groupAcessor(d)),
       orderAcessor(d)))
     .append("path")
     .attr("d", d => petalLinePath(getPetalPoints(attr1Scale(attr1Acessor(d)))))

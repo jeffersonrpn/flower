@@ -23,9 +23,9 @@ async function draw() {
   // Scales
   const petal = d3.line().curve(d3.curveBasisClosed);
   // const points = [[5,25],[22,6],[60,40],[70,95],[20, 56],[14, 36]];
-  const petalPoints1 = [[4,4],[20,6],[56,20],[80,80],[42,58],[0,28],[22,26],[0,18]];
-  const petalPoints0 = [[0,0],[12,6],[56,20],[82,80],[50,62],[22,46],[0,20]];
-  const petalPoints3 = [[0,0],[26,4],[56,20],[85,80],[46,58],[10,40],[22,32],[8,32],[8,22],[16,20],[0,16]];
+  const petalPoints1 = [[4,4],[20,6],[56,20],[80,70],[80,80],[78,80],[42,68],[0,28],[18,26],[0,18]];
+  const petalPoints0 = [[0,0],[12,6],[56,20],[80,70],[80,80],[78,80],[50,68],[22,46],[0,20]];
+  const petalPoints3 = [[0,0],[26,4],[56,20],[80,70],[80,80],[78,80],[42,68],[10,40],[18,32],[8,32],[8,22],[12,20],[0,16]];
 
   const petal1 = bounds.append("g")
     .attr("transform", "translate(0, 0)")
@@ -99,8 +99,8 @@ async function draw() {
   bounds.append("g")
     .attr("transform", "translate(0, 0)")
       .append("circle")
-        .attr("cx", 70)
-        .attr("cy", 70)
+        .attr("cx", 80)
+        .attr("cy", 80)
         .attr("r", 3)
         .attr("fill", "red")
         .attr("stroke-width", "none");
@@ -108,8 +108,8 @@ async function draw() {
   bounds.append("g")
     .attr("transform", "translate(0, 120)")
       .append("circle")
-        .attr("cx", 70)
-        .attr("cy", 70)
+        .attr("cx", 80)
+        .attr("cy", 78)
         .attr("r", 3)
         .attr("fill", "red")
         .attr("stroke-width", "none");
@@ -117,8 +117,8 @@ async function draw() {
   bounds.append("g")
     .attr("transform", "translate(0, 240)")
       .append("circle")
-        .attr("cx", 72)
-        .attr("cy", 68)
+        .attr("cx", 80)
+        .attr("cy", 80)
         .attr("r", 3)
         .attr("fill", "red")
         .attr("stroke-width", "none");
